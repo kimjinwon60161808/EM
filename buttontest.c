@@ -25,11 +25,11 @@ int main(int argc, char *argv[]){
    buttonInit();  
    while(1){
       returnValue =  msgrcv(msgID, &rcv,sizeof(int),0,IPC_NOWAIT);
-       //printf("%d",rcv.keyInput);
-       if(returnValue >=0)
+       //printf("%d",returnValue);
+       if(returnValue !=-1)
        {
-         buttonInit();  
-      }
+			buttonInit();  
+	   }
    }
       printf("\n");
       buttonExit();
