@@ -3,17 +3,17 @@ AR = arm-linux-gnueabi-ar
 
 all: libMyPeri.a
 
-libMyPeri.a: button.o led.o buzzer.o fnd.o textlcd.o temp.o colorled.o
-   $(AR) rc libMyPeri.a led.o button.o buzzer.o fnd.o textlcd.o temp.o colorled.o
+libMyPeri.a: button.o led.o buzzer.o fnd.o textlcd.o temp.o
+   $(AR) rc libMyPeri.a led.o button.o buzzer.o fnd.o textlcd.o temp.o
 
    
-colorled.o: colorled.c colorled.h
-   $(CC) colorled.c -o colorled.o -c
+temp.o: temp.c temp.h
+   $(CC) temp.c -o temp.o -c
 
-new_colortest: colorledtest.c colorled.h libMyPeri.a
-   $(CC) colorledtest.c -l MyPeri -L. -o new_colortest 
-   scp new_colortest ecube@192.168.0.117:/home/ecube
+new_temptest: temptest.c temp.h libMyPeri.a
+   $(CC) temptest.c -l MyPeri -L. -o new_temptest 
+   scp new_temptest ecube@192.168.0.117:/home/ecube
 
 clean:
    rm *.a
-   rm new_colortest
+   rm new_temptest
