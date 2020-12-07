@@ -9,30 +9,25 @@
 #include <sys/ioctl.h>//for ioctl
 //first read input device
 #include <sys/msg.h>
+
 #include "button.h"
-static int msgID = 0;
 int main(int argc, char *argv[]){
-   BUTTON_MSG_T rcv;
-   rcv.messageNum = 1;
-   msgID = msgget (1122, IPC_CREAT|0666);
-   if(msgID == -1){
-   printf("ID get error\n");
+   buttonInit();
+
+   int msgID = msgget( MESSAGE_ID, IPC_CREAT|0666);
+   BUTTON_MSG_T recvMsg;
+   while (1)
+   {
+      msgrcv(msgID, &recvMsg, sizeof (recvMsg)-sizeof (long int), 0, 0);
+      switch (recvMsg.keyInput)
+      {
+            case KEY_VOLUMEUP: printf("Volume up key : %d\n",recvMsg.keyInput); break;
+            case KEY_HOME: printf("home key : %d\n",recvMsg.keyInput); break;
+            case KEY_SEARCH: printf("search key : %d\n",recvMsg.keyInput); break;
+            case KEY_BACK: printf("back key : %d\n",recvMsg.keyInput); break;
+              case KEY_MENU: printf("menu key : %d\n",recvMsg.keyInput); break;
+            case KEY_VOLUMEDOWN: printf("Volume down key : %d\n",recvMsg.keyInput); break;
+      }
    }
-   else{
-   printf("get ID!!\n");
-   }
-   int returnValue = 0;
-   buttonInit();  
-   while(1){
-      returnValue =  msgrcv(msgID, &rcv,sizeof(int),0,IPC_NOWAIT);
-       //printf("%d",returnValue);
-       if(returnValue !=-1)
-       {
-			buttonInit();  
-	   }
-   }
-      printf("\n");
-      buttonExit();
-      return 0;
 }
    
