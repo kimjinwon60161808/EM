@@ -61,3 +61,11 @@ int textexit(void){
    close(fd);
    return 0;
 }
+
+
+
+int tlcdwrite(char *str3, const char *str4)
+{
+	textwrite("1", "THIS MUSIC IS!");
+	textwrite("2", "AEGUKGA!!");
+}

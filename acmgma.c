@@ -45,7 +45,8 @@ FILE *fp = NULL;
    fp = fopen (GYROPATH "data", "rt");
    int gyro[3];
    fscanf(fp,"%d, %d, %d",&gyro[0],&gyro[1],&gyro[2]);
-   printf ("I read Gyroscope %d, %d, %d\r\n",gyro[0],gyro[1],gyro[2]);
+   printf ("I read Gyroscope %d\r\n",gyro[0]);
    fclose(fp);
-   return 0;
+   return gyro[0];
 }
+

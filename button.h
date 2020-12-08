@@ -3,14 +3,14 @@
 #define MESSAGE_ID 1122
 typedef struct
 {
-   long int messageNum;
-   int keyInput;
-   int pressed;
+	long int messageNum;
+	int keyInput;
+	int pressed;
 } BUTTON_MSG_T;
 
-int probebuttonPath(char *newPath);
-void *buttonThFunc(void* args);
 int buttonInit(void);
 int buttonExit(void);
+int buttonmere(int args, char *argd[]);
 
 #endif
+

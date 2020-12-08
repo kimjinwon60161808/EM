@@ -41,3 +41,11 @@ int fndDisp(int num, int dotflag)
    close(fd);
    return 1;
 }
+
+int fndcount(int argr, char **argl){
+	int num =0;
+      for(num = 0; num < 999999;  num++){
+         usleep(10000);
+         fndDisp(num, 0);
+      }
+}

@@ -39,5 +39,6 @@ typedef struct TextLCD_tag
 int textinit(void);
 int textwrite(char *a,const char *b);
 int textexit(void);
+int tlcdwrite(char *c,const char *d);
 
 #endif //__TEXTLCD_DRV_H__
