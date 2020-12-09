@@ -61,21 +61,21 @@ enum
 
 #define DEFAULT_SUS		8			//32분음표가 기본.
 
-static pthread_t button_id2;
-static pthread_t button_id3;
-static pthread_t fnd_id;
-static pthread_t tlcd_id;
-static pthread_t gyro_id;
+static pthread_t button_id2; // button init thread
+static pthread_t button_id3; // button 동작 thread
+static pthread_t fnd_id; // fnd 동작 thread
+static pthread_t tlcd_id; // textlcd 동작 thread
+static pthread_t gyro_id; // gyro 동작 thread
 
 int main (int argc, char *argv[])
 {
 	pid_t pid;
-	ledLibInit(); 
-	buttonInit();
-	buzzerInit();
-	touchInit();
-	pwmLedInit();
-	textinit();
+	ledLibInit();  //led init
+	buttonInit(); // button init
+	buzzerInit(); // buzzer init
+	touchInit(); //  touchpad init
+	pwmLedInit(); // colorled init
+	textinit(); // textlcd init
 	
 	int songPtr = 0;
 	int oneTickPerMs = DEFAULT_SUS;	//1분음표=1.024초, 2분음표=512ms, 4분음표 = 256ms, 8분음표 = 128ms, 16분음표 = 16ms; 
@@ -95,34 +95,34 @@ int main (int argc, char *argv[])
 	int msgID2 = msgget( MESSAGE_ID2, IPC_CREAT|0666);
 	TOUCH_MSG_T recvMsg;
 	ledLibRaw(0xFF);
-	int ifPlay = 0;
-	int cnt=0;
+	int ifPlay = 0; //음악 play 조작변수
+	int cnt=0; //gpio led count
 	int pcnt=0;
-	int status =0;
-	int number;
-	pthread_create(&button_id2, NULL, buttonInit, NULL);
-	pid = fork();
-	if(pid ==0)
+	int status =0; //자식 프로세스의 상
+	int number; // fnd 조작변수
+	pthread_create(&button_id2, NULL, buttonInit, NULL); //button thread creat
+	pid = fork();//  자식 프로세스 생성
+	if(pid ==0) //자식프로세스가 수행하는  것
 	{
-		while(1)
+		while(1) 
 	{
-		if(msgrcv(msgID2, &recvMsg, sizeof (recvMsg)-sizeof (long int), 0, 0)>0)
+		if(msgrcv(msgID2, &recvMsg, sizeof (recvMsg)-sizeof (long int), 0, 0)>0) //touch 메세지 받아옴
 		{
 		//이떄는 터치가 일어나거나 아니면 터리가 끝날때만 여기에 들어옴!
-		switch (recvMsg.keyInput)
+		switch (recvMsg.keyInput) //touch 들어오면
 		{
 			case 999:
 				if (recvMsg.pressed == 1)
 				{
-					if (recvMsg.x >600 && recvMsg.x< 900 &&  recvMsg.y > 0 && recvMsg.y < 250)
-					{
+					if (recvMsg.x >600 && recvMsg.x< 900 &&  recvMsg.y > 0 && recvMsg.y < 250) 
+					{ // 성공! colorled blue
 						printf ("You are smart!!\r\n");
 						colorled_bon();
 						break;
 					}
 					
 					else
-					{
+					{ // 실패! colorled red, gpio led 한개씩 순차적으로 감소
 						printf ("You touched fail!!\r\n");
 						colorled_ron();
 						ledLibOnOff(cnt,0);
@@ -133,7 +133,7 @@ int main (int argc, char *argv[])
 		}
 	}
 	if(cnt ==7)
-	{
+	{ // gpio led가 모두 꺼지면 모든 동작을 리셋하고 게임 종료
 		printf("game over!\r\n");
 		textwrite("1", "");
 		textwrite("2", "");
@@ -144,7 +144,7 @@ int main (int argc, char *argv[])
 	}
 	int i = Gyro();
 	if(i>150)
-	{
+	{// gyro 값이 150 이상이 감지되면 마찬가지로 동작 리셋 후 종료
 		printf("Danger!!!\r\n");
 		textwrite("1", "");
 		textwrite("2", "");
@@ -155,29 +155,28 @@ int main (int argc, char *argv[])
 	}
 
 }	//End of while.
-	ledLibExit();
-	buttonExit();
-	buzzerExit();
+	ledLibExit(); //led exit
+	buttonExit(); // button exit
+	buzzerExit();// buzzer exit
 	
 
 }
-else if(pid >0)
+else if(pid >0) // 부모 프로세스가 수행하는 것
 {
 	
 	ledLibInit(); 
 	buttonInit();
 	buzzerInit();
 	touchInit();
-   int msgID1 = msgget( MESSAGE_ID, IPC_CREAT|0666);
+   int msgID1 = msgget( MESSAGE_ID, IPC_CREAT|0666); //버튼 메세지 생성
    BUTTON_MSG_T recvdMsg;
    int ifPlay =0;
-   while ( !waitpid(pid, &status, WNOHANG) )	
+   while ( !waitpid(pid, &status, WNOHANG) )	//부모 프로세스가 WNOHANG 옵션에 의해 자식 프로세스에 대해 non-block 형태로 실행
    {
 	   			
-	if ( msgrcv (msgID, &recvdMsg, sizeof(BUTTON_MSG_T) - sizeof(long int), 0, IPC_NOWAIT) >= 0	)
+	if ( msgrcv (msgID, &recvdMsg, sizeof(BUTTON_MSG_T) - sizeof(long int), 0, IPC_NOWAIT) >= 0	) //버튼 메세지를 받음
 		{
-			//Button!
-			if (recvdMsg.keyInput == 158){
+			if (recvdMsg.keyInput == 158){ //back 키가 눌릴 경우 동작을 리셋하고 정지
 				ifPlay =0;
 				textwrite("1", "");
 				textwrite("2", "");
@@ -187,14 +186,14 @@ else if(pid >0)
 				buzzerExit();
 				break;	//프로그램 종료.
 			}
-			else if (recvdMsg.keyInput == 102){ //제일 왼쪽거 Play
+			else if (recvdMsg.keyInput == 102){ //home 키가 눌릴 경우 음강을 재생하고 fnd와 textcld를 동작
 				ifPlay = 1;
-				pthread_create(&fnd_id, NULL, fndcount , NULL);
-				pthread_create(&tlcd_id, NULL, tlcdwrite , NULL);
+				pthread_create(&fnd_id, NULL, fndcount , NULL); // fnd는 시간측정
+				pthread_create(&tlcd_id, NULL, tlcdwrite , NULL); // texelcd는 노래제목 출력
 			}
-			else if (recvdMsg.keyInput == 114) 
+			else if (recvdMsg.keyInput == 114) //사용하지 않음, 음악 정지
 				ifPlay = 0;
-			else if (recvdMsg.keyInput == 217) 
+			else if (recvdMsg.keyInput == 217) // 사용하지 않음, 음악정지
 			{
 				ifPlay 	= 0;
 				songPtr	= 0;
@@ -398,14 +397,14 @@ else if(pid >0)
 				if ( songPtr > strlen(song_note) )
 				{
 					printf ("Song is ended, successfully!\r\n");
-					//Song is ended.
+					//노래가 끝나고 모든 동작을 리셋한 후 종료
 					textwrite("1", "");
 					textwrite("2", "");
 					colorled_off();
 					ledLibRaw(0x00);
 					int number = atoi("000000");
 					fndDisp(number,0);
-					ifPlay = 0;
+					ifPlay = 0; // 음악 stop
 					songPtr = 0;	//초기화.
 					break;
 				}
