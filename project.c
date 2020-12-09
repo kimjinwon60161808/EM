@@ -146,6 +146,11 @@ int main (int argc, char *argv[])
 	if(i>150)
 	{
 		printf("Danger!!!\r\n");
+		textwrite("1", "");
+		textwrite("2", "");
+		colorled_off();
+		int number = atoi("000000");
+		fndDisp(number,0);
 		break;
 	}
 
@@ -172,8 +177,16 @@ else if(pid >0)
 	if ( msgrcv (msgID, &recvdMsg, sizeof(BUTTON_MSG_T) - sizeof(long int), 0, IPC_NOWAIT) >= 0	)
 		{
 			//Button!
-			if (recvdMsg.keyInput == 158) 
+			if (recvdMsg.keyInput == 158){
+				ifPlay =0;
+				textwrite("1", "");
+				textwrite("2", "");
+				colorled_off();
+				int number = atoi("000000");
+				fndDisp(number,0);
+				buzzerExit();
 				break;	//프로그램 종료.
+			}
 			else if (recvdMsg.keyInput == 102){ //제일 왼쪽거 Play
 				ifPlay = 1;
 				pthread_create(&fnd_id, NULL, fndcount , NULL);
@@ -386,8 +399,15 @@ else if(pid >0)
 				{
 					printf ("Song is ended, successfully!\r\n");
 					//Song is ended.
+					textwrite("1", "");
+					textwrite("2", "");
+					colorled_off();
+					ledLibRaw(0x00);
+					int number = atoi("000000");
+					fndDisp(number,0);
 					ifPlay = 0;
 					songPtr = 0;	//초기화.
+					break;
 				}
 			}
 			else
